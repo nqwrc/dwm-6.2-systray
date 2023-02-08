@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 1;        /* border pixel of windows */
+static const unsigned int borderpx  = 3;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
 static const unsigned int systrayspacing = 2;   /* systray spacing */
@@ -11,11 +11,25 @@ static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const char *fonts[]          = { "monospace:size=13" };
 static const char dmenufont[]       = "monospace:size=13";
+/*
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
 static const char col_cyan[]        = "#005577";
+
+static const char col_gray1[]       = "#222222";
+static const char col_gray2[]       = "#444444";
+static const char col_gray3[]       = "#bbbbbb";
+static const char col_gray4[]       = "#eeeeee";
+static const char col_cyan[]        = "#005b96";
+*/
+static const char col_gray1[]       = "#23272a";
+static const char col_gray2[]       = "#2c2f33";
+static const char col_gray3[]       = "#99aab5";
+static const char col_gray4[]       = "#ffffff";
+static const char col_cyan[]        = "#7289da";
+
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
@@ -47,7 +61,9 @@ static const Layout layouts[] = {
 };
 
 /* key definitions */
+/* Modkey is ALT, Mod4 is Win Key */
 #define MODKEY Mod1Mask
+#define TERMKEY MODKEY|ShiftMask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
@@ -60,26 +76,49 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "xfce4-terminal", NULL };
 
 static const char *scrotcmd[] = { "scrot", "%a-%H%M%S.png", "-e", "mv $f ~/scrots/", NULL };
 static const char *surfgo[] = { "surf", "-g", "google.com", NULL };
+static const char *qutebrowser[] = { "qutebrowser", NULL };
 static const char *clipmenu[] = { "clipmenu", NULL };
-static const char *openhome[] = { "home-open", NULL };
-static const char *rangerfm[] = { "st", "ranger", NULL };
-static const char *openroot[] = {"root-open", NULL};
+static const char *openhome[] = { "xfce4-terminal", "-e", "rofi-open", NULL };
+static const char *rangerfm[] = { "xfce4-terminal", "-e", "ranger", NULL };
+static const char *rofirun[] = { "rofi_run", NULL};
+static const char *reloadwm[] = { "pkill", "dwm", NULL};
+static const char *reload_dwm[] = { "sh", "-c", "echo escape | xdotool type --clearmodifiers --delay 0 --file -", NULL };
+static const char *toggle_touchpad[] = { "toggle_touchpad", NULL};
+
+static const char *upvol[]   = { "/usr/bin/pactl", "set-sink-volume", "0", "+5%",     NULL };
+static const char *downvol[] = { "/usr/bin/pactl", "set-sink-volume", "0", "-5%",     NULL };
+static const char *mutevol[] = { "/usr/bin/pactl", "set-sink-mute",   "0", "toggle",  NULL };
+/*
+static const char *light_up[] = {"/usr/bin/light", "-A", "5", NULL};
+static const char *light_down[] = {"/usr/bin/light", "-U", "5", NULL};
+*/
+static const char *light_up[] = {"lightup", NULL};
+static const char *light_down[] = {"lightdown", NULL};
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+	{ MODKEY,                       XK_F1,     spawn,          {.v = mutevol } },
+	{ MODKEY,                       XK_F2,     spawn,          {.v = downvol } },
+	{ MODKEY,                       XK_F3,     spawn,          {.v = upvol   } },
+	{ MODKEY,                       XK_F6,     spawn,          {.v = toggle_touchpad } },
+	{ MODKEY,                       XK_F11,    spawn,          {.v = light_down} },
+	{ MODKEY,                       XK_F12,    spawn,          {.v = light_up} },
 	{ 0,                            XK_Print,  spawn,          {.v = scrotcmd} },
 	{ MODKEY,                       XK_o,      spawn,          {.v = openhome} },
-	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = openroot} },
+	{ MODKEY,                       XK_w,      spawn,          {.v = qutebrowser} },
+	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = rofirun} },
+	{ MODKEY|ShiftMask,             XK_r,      spawn,          SHCMD("pkill dwm & . .profile") },
+
 	{ Mod4Mask|ShiftMask,           XK_Return, spawn,          {.v = rangerfm} },
 	{ Mod4Mask|ShiftMask,           XK_w,      spawn,          {.v = surfgo} },
-	{ MODKEY|ShiftMask,             XK_v,      spawn,          {.v = clipmenu} },
+	{ MODKEY,	                XK_v,      spawn,          {.v = clipmenu} },
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
-	{ Mod4Mask,                     XK_Return, spawn,          {.v = termcmd} },
+	{ Mod4Mask,                     XK_Return, spawn,          {.v = termcmd } },
 
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -134,3 +173,5 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
+
+
